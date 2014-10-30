@@ -140,27 +140,27 @@ void ofxGestures::touchUp(ofTouchEventArgs & touch) {
     }
 };
 
-ofVec2f ofxGestures::getPanOrigin()
+ofVec2f ofxGestures::getPanOrigin() const
 {
     return m_panOrigin;
 }
 
-ofVec2f ofxGestures::getPanDelta()
+ofVec2f ofxGestures::getPanDelta() const
 {
     return m_panCurrent - m_panOrigin;
 }
 
-ofVec2f ofxGestures::getPinchOrigin()
+ofVec2f ofxGestures::getPinchOrigin() const
 {
     return (m_pinchOrigin2 + m_pinchOrigin1) / 2.0;
 }
 
-ofVec2f ofxGestures::getPinchDelta()
+ofVec2f ofxGestures::getPinchDelta() const
 {
     return (m_pinchCurrent2 + m_pinchCurrent1 - m_pinchOrigin2 - m_pinchOrigin1) / 2.0;
 }
 
-double ofxGestures::getPinchAngle()
+double ofxGestures::getPinchAngle() const
 {
     ofVec2f currentDelta = m_pinchCurrent2 - m_pinchCurrent1;
     ofVec2f originDelta = m_pinchOrigin2 - m_pinchOrigin1;
@@ -177,7 +177,7 @@ double ofxGestures::getPinchAngle()
     return currentAngle - originAngle;
 }
 
-double ofxGestures::getPinchScale()
+double ofxGestures::getPinchScale() const
 {
     ofVec2f currentDelta = m_pinchCurrent2 - m_pinchCurrent1;
     ofVec2f originDelta = m_pinchOrigin2 - m_pinchOrigin1;

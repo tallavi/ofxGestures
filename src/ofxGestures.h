@@ -52,14 +52,14 @@ public:
     
 public:
     
-    bool isPanning(){return m_isPanning;}
-    ofVec2f getPanOrigin();
-    ofVec2f getPanDelta();
+    bool isPanning() const {return m_isPanning;}
+    ofVec2f getPanOrigin() const;
+    ofVec2f getPanDelta() const;
     
-    bool isPinching(){return m_isPinching;}
-    ofVec2f getPinchOrigin();
-    ofVec2f getPinchDelta();
-    double getPinchAngle();
-    double getPinchScale();
+    bool isPinching() const {return m_isPinching;}
+    ofVec2f getPinchOrigin() const;
+    ofVec2f getPinchDelta() const;
+    double getPinchAngle() const;
+    double getPinchScale() const;
 };
 
