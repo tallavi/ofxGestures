@@ -9,10 +9,6 @@
 
 #include "ofMain.h"
 
-//TALTODO: helper method for "isTouchExist"
-
-//TALTODO: allow pan to continue when there's only one finger touching again?
-
 class ofxGestures
 {
     
@@ -40,6 +36,8 @@ private:
     void touchDown(ofTouchEventArgs & touch);
     void touchMoved(ofTouchEventArgs & touch);
     void touchUp(ofTouchEventArgs & touch);
+    
+    bool touchExists(int touchNum){return (m_touches.find(touchNum) != m_touches.end());}
 
 public:
     
