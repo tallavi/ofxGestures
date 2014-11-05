@@ -1,6 +1,5 @@
 //
 //  ofxGestures.cpp
-//  Trailze
 //
 //  Created by Tal Lavi on 10/21/14.
 //
