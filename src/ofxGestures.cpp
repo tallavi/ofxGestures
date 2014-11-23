@@ -30,8 +30,7 @@ void ofxGestures::touchDown(ofTouchEventArgs & touch) {
     //check if should stop panning
     if (m_isPanning && m_touches.size() > 1)
     {
-        ofEventArgs args;
-        ofNotifyEvent(panGestureEndedEvent, args);
+        ofNotifyEvent(panGestureEndedEvent);
         
         m_isPanning = false;
     }
@@ -44,8 +43,7 @@ void ofxGestures::touchDown(ofTouchEventArgs & touch) {
         m_panOrigin = m_touches[0];
         m_panCurrent = m_touches[0];
         
-        ofEventArgs args;
-        ofNotifyEvent(panGestureEvent, args);
+        ofNotifyEvent(panGestureEvent);
     }
     
     //check if should start pinching
@@ -58,8 +56,7 @@ void ofxGestures::touchDown(ofTouchEventArgs & touch) {
         m_pinchCurrent1 = m_touches[0];
         m_pinchCurrent2 = m_touches[1];
         
-        ofEventArgs args;
-        ofNotifyEvent(pinchGestureEvent, args);
+        ofNotifyEvent(pinchGestureEvent);
     }
 };
 
@@ -70,24 +67,21 @@ void ofxGestures::touchMoved(ofTouchEventArgs & touch) {
     {
         m_panCurrent = touch;
         
-        ofEventArgs args;
-        ofNotifyEvent(panGestureEvent, args);
+        ofNotifyEvent(panGestureEvent);
     }
     
     if (m_isPinching && touch.id == 0)
     {
         m_pinchCurrent1 = touch;
         
-        ofEventArgs args;
-        ofNotifyEvent(pinchGestureEvent, args);
+        ofNotifyEvent(pinchGestureEvent);
     }
     
     if (m_isPinching && touch.id == 1)
     {
         m_pinchCurrent2 = touch;
         
-        ofEventArgs args;
-        ofNotifyEvent(pinchGestureEvent, args);
+        ofNotifyEvent(pinchGestureEvent);
     }
 };
 
@@ -98,9 +92,7 @@ void ofxGestures::touchUp(ofTouchEventArgs & touch) {
     {
         if (!touchExists(0))   
         {
-            ofEventArgs args;
-            
-            ofNotifyEvent(panGestureEndedEvent, args);
+            ofNotifyEvent(panGestureEndedEvent);
             
             m_isPanning = false;
         }
@@ -110,9 +102,7 @@ void ofxGestures::touchUp(ofTouchEventArgs & touch) {
     {
         if (!touchExists(0) || !touchExists(1))
         {
-            ofEventArgs args;
-            
-            ofNotifyEvent(pinchGestureEndedEvent, args);
+            ofNotifyEvent(pinchGestureEndedEvent);
             
             m_isPinching = false;
         }

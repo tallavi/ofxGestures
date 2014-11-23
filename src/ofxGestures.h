@@ -41,11 +41,11 @@ private:
 
 public:
     
-    ofEvent<ofEventArgs> panGestureEvent;
-    ofEvent<ofEventArgs> panGestureEndedEvent;
+    ofEvent<void> panGestureEvent;
+    ofEvent<void> panGestureEndedEvent;
     
-    ofEvent<ofEventArgs> pinchGestureEvent;
-    ofEvent<ofEventArgs> pinchGestureEndedEvent;
+    ofEvent<void> pinchGestureEvent;
+    ofEvent<void> pinchGestureEndedEvent;
     
 public:
     
