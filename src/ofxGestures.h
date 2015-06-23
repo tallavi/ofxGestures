@@ -8,73 +8,76 @@
 #pragma once
 
 #include "ofMain.h"
-
+#include <Poco/Nullable.h>
 
 class ofxGestures
 {
 public:
-    class PanEvent{
+    
+    class PanGestureEventArgs{
     public:
-        ofVec2f getOrigin() const;
+        
+        ofTouchEventArgs origin;
+        ofTouchEventArgs current;
+
         ofVec2f getDelta() const;
     };
-
-    ofEvent<PanEvent> panGestureEvent;
-    ofEvent<PanEvent> panGestureEndedEvent;
-
-    class PinchEvent{
+    
+    ofEvent<const PanGestureEventArgs> panGestureEvent;
+    ofEvent<const PanGestureEventArgs> panGestureEndedEvent;
+    
+    class ExtendedPinchGestureEventArgs{
     public:
+        
+        
+    };
+    
+    class PinchGestureEventArgs{
+    public:
+        ofTouchEventArgs origin1;
+        ofTouchEventArgs origin2;
+        ofTouchEventArgs previous1;
+        ofTouchEventArgs previous2;
+        ofTouchEventArgs current1;
+        ofTouchEventArgs current2;
+        
         ofVec2f getOrigin() const;
-        ofVec3f getPrevious() const;
+        ofVec2f getPrevious() const;
+        ofVec2f getCurrent() const;
+        
+        double getScale() const;
+        double getRelativeScale() const;
+        
+        bool isExtended;
+        
         ofVec2f getDelta() const;
         ofVec2f getRelativeDelta() const;
         double getAngle() const;
-        double getScale() const;
         double getRelativeAngle() const;
-        double getRelativeScale() const;
+        
+        Poco::Nullable<ExtendedPinchGestureEventArgs> extendedPinchEvent;
     };
+
+    ofEvent<const PinchGestureEventArgs> pinchGestureEvent;
+    ofEvent<const PinchGestureEventArgs> pinchGestureEndedEvent;
     
-    ofEvent<PinchEvent> pinchGestureEvent;
-    ofEvent<PinchEvent> pinchGestureEndedEvent;
+    const Poco::Nullable<PanGestureEventArgs>& getCurrentPanEvent(){return m_currentPanEvent;}
+    const Poco::Nullable<PinchGestureEventArgs>& getCurrentPinchEvent(){return m_currentPinchEvent;}
+    
     
     static ofxGestures & get();
-    bool isPanning() const {return m_isPanning;}
-    ofVec2f getPanOrigin() const;
-    ofVec2f getPanDelta() const;
-    
-    bool isPinching() const {return m_isPinching;}
-    ofVec2f getPinchOrigin() const;
-    ofVec2f getPinchPrevious() const;
-    ofVec2f getPinchDelta() const;
-    ofVec2f getPinchRelativeDelta() const;
-    double getPinchAngle() const;
-    double getPinchRelativeAngle() const;
-    double getPinchScale() const;
-    double getPinchRelativeScale() const;
 
 private:
     bool touchDown(ofTouchEventArgs & touch);
     bool touchMoved(ofTouchEventArgs & touch);
     bool touchUp(ofTouchEventArgs & touch);
-
+    
     bool touchExists(int touchNum){return (m_touches.find(touchNum) != m_touches.end());}
 
     std::map<int, ofTouchEventArgs> m_touches;
-
-    bool m_isPanning;
-    ofTouchEventArgs m_panOrigin;
-    ofTouchEventArgs m_panCurrent;
-
-    bool m_isPinching;
-    ofTouchEventArgs m_pinchOrigin1;
-    ofTouchEventArgs m_pinchOrigin2;
-    ofTouchEventArgs m_pinchPrevious1;
-    ofTouchEventArgs m_pinchPrevious2;
-    ofTouchEventArgs m_pinchCurrent1;
-    ofTouchEventArgs m_pinchCurrent2;
-
-    PinchEvent pinch;
-    PanEvent pan;
+    
+    Poco::Nullable<PanGestureEventArgs> m_currentPanEvent;
+    Poco::Nullable<PinchGestureEventArgs> m_currentPinchEvent;
 
     ofxGestures();
 

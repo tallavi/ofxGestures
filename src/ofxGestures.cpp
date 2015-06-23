@@ -12,9 +12,7 @@ ofxGestures & ofxGestures::get(){
 	return *instance;
 }
 
-ofxGestures::ofxGestures():
-m_isPanning(false),
-m_isPinching(false)
+ofxGestures::ofxGestures()
 {
     ofAddListener(ofEvents().touchDown, this, &ofxGestures::touchDown, OF_EVENT_ORDER_BEFORE_APP);
 	ofAddListener(ofEvents().touchMoved, this, &ofxGestures::touchMoved, OF_EVENT_ORDER_BEFORE_APP);
@@ -33,46 +31,50 @@ bool ofxGestures::touchDown(ofTouchEventArgs & touch) {
     bool attended = false;
     
     //check if should stop panning
-    if (m_isPanning && m_touches.size() > 1)
+    if (!m_currentPanEvent.isNull() && m_touches.size() > 1)
     {
         try{
-        	panGestureEndedEvent.notify(this,pan);
+            panGestureEndedEvent.notify(this, m_currentPanEvent.value());
         }catch(...){
             attended = true;
         }
         
-        m_isPanning = false;
+        m_currentPanEvent.clear();
     }
     
     //check if should start panning
-    if (!m_isPanning && m_touches.size() == 1 && touchExists(0))
+    if (m_currentPanEvent.isNull() && m_touches.size() == 1 && touchExists(0))
     {
-        m_isPanning = true;
+        PanGestureEventArgs newPanGestureEventArgs;
         
-        m_panOrigin = m_touches[0];
-        m_panCurrent = m_touches[0];
+        newPanGestureEventArgs.origin = m_touches[0];
+        newPanGestureEventArgs.current = m_touches[0];
+        
+        m_currentPanEvent.assign(newPanGestureEventArgs);
 
         try{
-        	panGestureEvent.notify(this,pan);
+            panGestureEvent.notify(this, m_currentPanEvent.value());
         }catch(...){
             attended = true;
         }
     }
     
     //check if should start pinching
-    if (!m_isPinching && touchExists(0) && touchExists(1))
+    if (m_currentPinchEvent.isNull() && touchExists(0) && touchExists(1))
     {
-        m_isPinching = true;
+        PinchGestureEventArgs newPinchGestureEventArgs;
         
-        m_pinchOrigin1 = m_touches[0];
-        m_pinchOrigin2 = m_touches[1];
-        m_pinchCurrent1 = m_touches[0];
-        m_pinchCurrent2 = m_touches[1];
-        m_pinchPrevious1 = m_touches[0];
-        m_pinchPrevious2 = m_touches[1];
+        newPinchGestureEventArgs.origin1 = m_touches[0];
+        newPinchGestureEventArgs.origin2 = m_touches[1];
+        newPinchGestureEventArgs.current1 = m_touches[0];
+        newPinchGestureEventArgs.current2 = m_touches[1];
+        newPinchGestureEventArgs.previous1 = m_touches[0];
+        newPinchGestureEventArgs.previous2 = m_touches[1];
+        
+        m_currentPinchEvent.assign(newPinchGestureEventArgs);
 
         try{
-        	pinchGestureEvent.notify(this,pinch);
+        	pinchGestureEvent.notify(this, m_currentPinchEvent.value());
         }catch(...){
             attended = true;
         }
@@ -81,46 +83,62 @@ bool ofxGestures::touchDown(ofTouchEventArgs & touch) {
     return attended;
 };
 
+
 bool ofxGestures::touchMoved(ofTouchEventArgs & touch) {
     m_touches[touch.id] = touch;
     bool attended = false;
     
-    if (m_isPanning && touch.id == 0)
+    if (!m_currentPanEvent.isNull() && touch.id == 0)
     {
-        m_panCurrent = touch;
+        m_currentPanEvent.value().current = touch;
 
         try{
-        	panGestureEvent.notify(this,pan);
+            panGestureEvent.notify(this, m_currentPanEvent.value());
         }catch(...){
             attended = true;
         }
     }
     
-    if (m_isPinching && touch.id == 0)
+    bool notifyPinch = false;
+    
+    if (!m_currentPinchEvent.isNull() && touch.id == 0)
     {
-        m_pinchCurrent1 = touch;
-
-        try{
-        	pinchGestureEvent.notify(this,pinch);
-        }catch(...){
-            attended = true;
-        }
-
-        m_pinchPrevious1 = m_pinchCurrent1;
+        m_currentPinchEvent.value().current1 = touch;
+        
+        notifyPinch = true;
     }
     
-    if (m_isPinching && touch.id == 1)
+    if (!m_currentPinchEvent.isNull() && touch.id == 1)
     {
-        m_pinchCurrent2 = touch;
-
+        m_currentPinchEvent.value().current2 = touch;
+        
+        notifyPinch = true;
+    }
+    
+    if (notifyPinch) {
+        
+        if (!m_currentPinchEvent.value().isExtended) {
+            
+            //TALTODO:
+            
+            //if angle > tolerance, set extended true
+            
+            //else if delta > tolerance, set extended true
+            
+            m_currentPinchEvent.value().isExtended = true;
+        }
+        
         try{
-        	pinchGestureEvent.notify(this,pinch);
+            pinchGestureEvent.notify(this, m_currentPinchEvent.value());
         }catch(...){
             attended = true;
         }
-
-        m_pinchPrevious2 = m_pinchCurrent2;
+        
+        m_currentPinchEvent.value().previous1 = m_currentPinchEvent.value().current1;
+        m_currentPinchEvent.value().previous2 = m_currentPinchEvent.value().current2;
     }
+        
+        
     return attended;
 };
 
@@ -128,75 +146,59 @@ bool ofxGestures::touchUp(ofTouchEventArgs & touch) {
     m_touches.erase(touch.id);
     bool attended = false;
     
-    if (m_isPanning)
+    if (!m_currentPanEvent.isNull())
     {
         if (!touchExists(0))   
         {
             try{
-            	panGestureEndedEvent.notify(this,pan);
+            	panGestureEndedEvent.notify(this, m_currentPanEvent);
             }catch(...){
                 attended = true;
             }
-            m_isPanning = false;
+            
+            m_currentPanEvent.clear();
         }
     }
     
-    if (m_isPinching)
+    if (!m_currentPinchEvent.isNull())
     {
         if (!touchExists(0) || !touchExists(1))
         {
             try{
-            	pinchGestureEndedEvent.notify(this,pinch);
+            	pinchGestureEndedEvent.notify(this, m_currentPinchEvent);
             }catch(...){
                 attended = true;
             }
-            m_isPinching = false;
+            
+            m_currentPinchEvent.clear();
         }
     }
     return attended;
 };
 
-ofVec2f ofxGestures::getPanOrigin() const
-{
-    return m_panOrigin;
-}
-
-ofVec2f ofxGestures::getPanDelta() const
-{
-    return m_panCurrent - m_panOrigin;
-}
-
-ofVec2f ofxGestures::getPinchOrigin() const
-{
-    return (m_pinchOrigin2 + m_pinchOrigin1) / 2.0;
-}
-
-ofVec2f ofxGestures::getPinchDelta() const
-{
-    return (m_pinchCurrent2 + m_pinchCurrent1 - m_pinchOrigin2 - m_pinchOrigin1) / 2.0;
-}
-
-double ofxGestures::getPinchAngle() const
-{
-    ofVec2f currentDelta = m_pinchCurrent2 - m_pinchCurrent1;
-    ofVec2f originDelta = m_pinchOrigin2 - m_pinchOrigin1;
+ofVec2f ofxGestures::PanGestureEventArgs::getDelta() const {
     
-    double currentLength = sqrt(pow(currentDelta.x, 2) + pow(currentDelta.y, 2));
-    double originLength = sqrt(pow(originDelta.x, 2) + pow(originDelta.y, 2));
-    
-    double currentAngle = ofRadToDeg(asin(currentDelta.x / currentLength));
-    double originAngle = ofRadToDeg(asin(originDelta.x / originLength));
-    
-    if (m_pinchCurrent2.y > m_pinchCurrent1.y) currentAngle = 180.0 - currentAngle;
-    if ( m_pinchOrigin2.y >  m_pinchOrigin1.y) originAngle = 180.0 - originAngle;
-    
-    return currentAngle - originAngle;
+    return current - origin;
 }
 
-double ofxGestures::getPinchScale() const
-{
-    ofVec2f currentDelta = m_pinchCurrent2 - m_pinchCurrent1;
-    ofVec2f originDelta = m_pinchOrigin2 - m_pinchOrigin1;
+ofVec2f ofxGestures::PinchGestureEventArgs::getOrigin() const {
+    
+    return (origin2 + origin1) / 2.0;
+}
+
+ofVec2f ofxGestures::PinchGestureEventArgs::getPrevious() const {
+    return (previous2 + previous1) / 2.0;
+}
+
+ofVec2f ofxGestures::PinchGestureEventArgs::getCurrent() const {
+    
+    return (current2 + current1) / 2.0;
+}
+
+double ofxGestures::PinchGestureEventArgs::getScale() const {
+    
+    ofVec2f currentDelta = current2 - current1;
+    ofVec2f originDelta = origin2 - origin1;
     
     double currentLength = sqrt(pow(currentDelta.x, 2) + pow(currentDelta.y, 2));
     double originLength = sqrt(pow(originDelta.x, 2) + pow(originDelta.y, 2));
@@ -204,77 +206,69 @@ double ofxGestures::getPinchScale() const
     return currentLength / originLength;
 }
 
-
-ofVec2f ofxGestures::getPinchPrevious() const{
-    return (m_pinchPrevious2 + m_pinchPrevious1) / 2.0;
-}
-
-ofVec2f ofxGestures::getPinchRelativeDelta() const{
-    return (m_pinchCurrent2 + m_pinchCurrent1 - m_pinchPrevious2 - m_pinchPrevious1) / 2.0;
-}
-
-double ofxGestures::getPinchRelativeAngle() const{
-    ofVec2f currentDelta = m_pinchCurrent2 - m_pinchCurrent1;
-    ofVec2f previousDelta = m_pinchPrevious2 - m_pinchPrevious1;
-
+double ofxGestures::PinchGestureEventArgs::getRelativeScale() const {
+    
+    ofVec2f currentDelta = current2 - current1;
+    ofVec2f previousDelta = previous2 - previous1;
+    
     double currentLength = sqrt(pow(currentDelta.x, 2) + pow(currentDelta.y, 2));
     double previousLength = sqrt(pow(previousDelta.x, 2) + pow(previousDelta.y, 2));
-
-    double currentAngle = ofRadToDeg(asin(currentDelta.x / currentLength));
-    double previousAngle = ofRadToDeg(asin(previousDelta.x / previousLength));
-
-    if (m_pinchCurrent2.y > m_pinchCurrent1.y) currentAngle = 180.0 - currentAngle;
-    if (m_pinchPrevious2.y >  m_pinchPrevious1.y) previousAngle = 180.0 - previousAngle;
-
-    return currentAngle - previousAngle;
-}
-
-double ofxGestures::getPinchRelativeScale() const{
-    ofVec2f currentDelta = m_pinchCurrent2 - m_pinchCurrent1;
-    ofVec2f previousDelta = m_pinchPrevious2 - m_pinchPrevious1;
-
-    double currentLength = sqrt(pow(currentDelta.x, 2) + pow(currentDelta.y, 2));
-    double previousLength = sqrt(pow(previousDelta.x, 2) + pow(previousDelta.y, 2));
-
+    
     return currentLength / previousLength;
 }
 
-ofVec2f ofxGestures::PinchEvent::getOrigin() const{
-	return ofxGestures::get().getPinchOrigin();
+ofVec2f ofxGestures::PinchGestureEventArgs::getDelta() const {
+    
+    if (!isExtended)
+        return ofVec2f(0,0);
+    
+    return (current2 + current1 - origin2 - origin1) / 2.0;
 }
 
-ofVec3f ofxGestures::PinchEvent::getPrevious() const{
-	return ofxGestures::get().getPinchPrevious();
+ofVec2f ofxGestures::PinchGestureEventArgs::getRelativeDelta() const {
+    
+    if (!isExtended)
+        return ofVec2f(0,0);
+    
+    return (current2 + current1 - previous2 - previous1) / 2.0;
 }
 
-ofVec2f ofxGestures::PinchEvent::getDelta() const{
-	return ofxGestures::get().getPinchDelta();
+double ofxGestures::PinchGestureEventArgs::getAngle() const {
+ 
+    if (!isExtended)
+        return 0.0;
+    
+    ofVec2f currentDelta = current2 - current1;
+    ofVec2f originDelta = origin2 - origin1;
+    
+    double currentLength = sqrt(pow(currentDelta.x, 2) + pow(currentDelta.y, 2));
+    double originLength = sqrt(pow(originDelta.x, 2) + pow(originDelta.y, 2));
+    
+    double currentAngle = ofRadToDeg(asin(currentDelta.x / currentLength));
+    double originAngle = ofRadToDeg(asin(originDelta.x / originLength));
+    
+    if (current2.y > current1.y) currentAngle = 180.0 - currentAngle;
+    if ( origin2.y >  origin1.y) originAngle = 180.0 - originAngle;
+    
+    return currentAngle - originAngle;
 }
 
-ofVec2f ofxGestures::PinchEvent::getRelativeDelta() const{
-	return ofxGestures::get().getPinchRelativeDelta();
+double ofxGestures::PinchGestureEventArgs::getRelativeAngle() const {
+    
+    ofVec2f currentDelta = current2 - current1;
+    ofVec2f previousDelta = previous2 - previous1;
+    
+    double currentLength = sqrt(pow(currentDelta.x, 2) + pow(currentDelta.y, 2));
+    double previousLength = sqrt(pow(previousDelta.x, 2) + pow(previousDelta.y, 2));
+    
+    double currentAngle = ofRadToDeg(asin(currentDelta.x / currentLength));
+    double previousAngle = ofRadToDeg(asin(previousDelta.x / previousLength));
+    
+    if (current2.y > current1.y) currentAngle = 180.0 - currentAngle;
+    if (previous2.y >  previous1.y) previousAngle = 180.0 - previousAngle;
+    
+    return currentAngle - previousAngle;
 }
 
-double ofxGestures::PinchEvent::getAngle() const{
-	return ofxGestures::get().getPinchAngle();
-}
 
-double ofxGestures::PinchEvent::getScale() const{
-	return ofxGestures::get().getPinchScale();
-}
 
-double ofxGestures::PinchEvent::getRelativeAngle() const{
-	return ofxGestures::get().getPinchRelativeAngle();
-}
-
-double ofxGestures::PinchEvent::getRelativeScale() const{
-	return ofxGestures::get().getPinchRelativeScale();
-}
-
-ofVec2f ofxGestures::PanEvent::getOrigin() const{
-	return ofxGestures::get().getPanOrigin();
-}
-
-ofVec2f ofxGestures::PanEvent::getDelta() const{
-	return ofxGestures::get().getPanDelta();
-}
