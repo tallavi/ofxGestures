@@ -26,12 +26,6 @@ public:
     ofEvent<const PanGestureEventArgs> panGestureEvent;
     ofEvent<const PanGestureEventArgs> panGestureEndedEvent;
     
-    class ExtendedPinchGestureEventArgs{
-    public:
-        
-        
-    };
-    
     class PinchGestureEventArgs{
     public:
         ofTouchEventArgs origin1;
@@ -54,8 +48,6 @@ public:
         ofVec2f getRelativeDelta() const;
         double getAngle() const;
         double getRelativeAngle() const;
-        
-        Poco::Nullable<ExtendedPinchGestureEventArgs> extendedPinchEvent;
     };
 
     ofEvent<const PinchGestureEventArgs> pinchGestureEvent;
@@ -64,6 +56,12 @@ public:
     const Poco::Nullable<PanGestureEventArgs>& getCurrentPanEvent(){return m_currentPanEvent;}
     const Poco::Nullable<PinchGestureEventArgs>& getCurrentPinchEvent(){return m_currentPinchEvent;}
     
+    class TapGestureEventArgs{
+    public:
+        ofVec2f origin;
+    };
+    
+    ofEvent<const TapGestureEventArgs> tapGestureEvent;
     
     static ofxGestures & get();
 

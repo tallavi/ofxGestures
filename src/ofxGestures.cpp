@@ -7,6 +7,12 @@
 
 #include "ofxGestures.h"
 
+const int PAN_DELTA_TOLLERANCE = 1;
+const int PINCH_DELTA_TOLLERANCE = 4;
+
+const double TAP_MAX_TIME = 0.5;
+const int PINCH_ANGLE_TOLLERANCE = 30;
+
 ofxGestures & ofxGestures::get(){
 	static ofxGestures * instance = new ofxGestures();
 	return *instance;
