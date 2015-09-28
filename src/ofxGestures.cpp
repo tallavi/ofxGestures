@@ -6,7 +6,6 @@
 //
 
 #include "ofxGestures.h"
-#include "MathUtils.h"
 
 ofxGestures::ofxGestures():
 m_isPanning(false),
@@ -137,8 +136,8 @@ double ofxGestures::getPinchAngle() const
     double currentLength = sqrt(pow(currentDelta.x, 2) + pow(currentDelta.y, 2));
     double originLength = sqrt(pow(originDelta.x, 2) + pow(originDelta.y, 2));
     
-    double currentAngle = rad2deg(asin(currentDelta.x / currentLength));
-    double originAngle = rad2deg(asin(originDelta.x / originLength));
+    double currentAngle = ofRadToDeg(asin(currentDelta.x / currentLength));
+    double originAngle = ofRadToDeg(asin(originDelta.x / originLength));
     
     if (m_pinchCurrent2.y > m_pinchCurrent1.y) currentAngle = 180.0 - currentAngle;
     if ( m_pinchOrigin2.y >  m_pinchOrigin1.y)  originAngle = 180.0 - originAngle;
