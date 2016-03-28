@@ -74,7 +74,7 @@ public:
         double getRelativeScale() const;
         
         bool isExtended()const;
-        void enabledExtended();
+        void disableExtended();
         
         ofVec2f getDelta() const;
         ofVec2f getRelativeDelta() const;
@@ -88,7 +88,7 @@ public:
         
         Touch m_firstTouch;
         Touch m_secondTouch;
-        bool m_extended = false;
+        bool m_extended = true;
     };
     
     class BaseState{

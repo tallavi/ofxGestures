@@ -9,8 +9,8 @@
 #include "ofxGesturesStates.h"
 #include "EnvironmentHelper.h"
 
-const int PAN_DELTA_TOLLERANCE = 1;
-const int PINCH_DELTA_TOLLERANCE = 4;
+//const int PAN_DELTA_TOLLERANCE = 1;
+//const int PINCH_DELTA_TOLLERANCE = 4;
 
 const double TAP_MAX_TIME = 0.5;
 const int PINCH_ANGLE_TOLLERANCE = 30;
@@ -21,13 +21,31 @@ float getPixelsByPercent(int percent){
     return ofGetWindowWidth()*percent / 100.0;
 }
 
+const int PAN_DELTA_TOLLERANCE(){
+    static const int pan_delta_tollerance = getPixelsByPercent(1);
+    return pan_delta_tollerance;
+}
+
+const int PINCH_DELTA_TOLLERANCE(){
+    static const int pinch_delta_tollerance = getPixelsByPercent(4);
+    return pinch_delta_tollerance;
+}
+
+const double TAP_MAX_TIME_MICROSECOND(){
+    static const double tap_max_time(TAP_MAX_TIME * 1000 * 1000);
+    return tap_max_time;
+}
+
+const double PRESS_LONG_TIME_MILLISECOND(){
+    static const double press_long_time(PRESS_LONG_TIME * 1000);
+    return press_long_time;
+}
+
 //================================ None State ==================================//
 NoneState::NoneState(){
-    ofLogNotice("NoneState")<<"created";
 }
 
 NoneState::~NoneState(){
-    ofLogNotice("NoneState")<<"destroy";
 }
 
 bool NoneState::touchDown(ofTouchEventArgs &touch){
@@ -38,13 +56,11 @@ bool NoneState::touchDown(ofTouchEventArgs &touch){
 
 //================================ FirstTouch State ==================================//
 FirstTouchState::FirstTouchState(){
-    ofLogNotice("FirstTouchState")<<"created";
-    m_tapTimer.setStartInterval(PRESS_LONG_TIME * 1000);
+    m_tapTimer.setStartInterval(PRESS_LONG_TIME_MILLISECOND());
     m_tapTimer.start(Poco::TimerCallback<FirstTouchState>(*this, &FirstTouchState::onTimer));
 }
 
 FirstTouchState::~FirstTouchState(){
-    ofLogNotice("FirstTouchState")<<"destroy";
 }
 
 bool FirstTouchState::touchDown(ofTouchEventArgs & touch){
@@ -55,7 +71,7 @@ bool FirstTouchState::touchDown(ofTouchEventArgs & touch){
 
 bool FirstTouchState::touchMoved(ofTouchEventArgs & touch){
     ofxGestures::Touch &current_touch = ofxGestures::get().m_touches[0];
-    if((current_touch.m_origin - current_touch.m_current).length() > getPixelsByPercent(PAN_DELTA_TOLLERANCE)){
+    if((current_touch.m_origin - current_touch.m_current).length() > PAN_DELTA_TOLLERANCE()){
         m_tapTimer.stop();
         setNextState<PanState>();
     }
@@ -66,8 +82,9 @@ bool FirstTouchState::touchUp(ofTouchEventArgs & touch){
     bool attended = false;
     m_tapTimer.stop();
     Poco::Timestamp::TimeDiff deltaTime = Poco::Timestamp() - m_initialTime;
-    if(deltaTime < TAP_MAX_TIME * 1000)
+    if(deltaTime < TAP_MAX_TIME_MICROSECOND()){
         attended = ofxGestures::get().notifyTapEvent(ofxGestures::get().m_touches[0].m_origin);
+    }
     setNextState<NoneState>();
     return attended;
 }
@@ -79,13 +96,11 @@ void FirstTouchState::onTimer(Poco::Timer& timer){
 
 //================================ Pan State ==================================//
 PanState::PanState(){
-    ofLogNotice("PanState")<<"created";
     m_panArgs.assign(ofxGestures::PanEventArgs(ofxGestures::get().m_touches[0]));
     ofxGestures::get().notifyPanEvent(m_panArgs);
 }
 
 PanState::~PanState(){
-    ofLogNotice("PanState")<<"destroy";
 }
 
 bool PanState::touchDown(ofTouchEventArgs & touch){
@@ -111,18 +126,27 @@ Poco::Nullable<ofxGestures::PanEventArgs> PanState::getPanEventArgs(){
     return m_panArgs;
 }
 
-//================================ Pinch State ==================================//
-PinchState::PinchState(){
-    ofLogNotice("PinchState")<<"created";
+//================================ PinchExtended State ==================================//
+PinchExtendedState::PinchExtendedState():PinchExtendedState(true){
+    ofLogNotice("PinchExtendedState")<<"created";
+}
+
+PinchExtendedState::PinchExtendedState(bool isNotify){
+    initialPinchArgs();
+    if(isNotify)
+        notifyPinchEvent();
+}
+
+PinchExtendedState::~PinchExtendedState(){
+    ofLogNotice("PinchExtendedState")<<"destroy";
+}
+
+void PinchExtendedState::initialPinchArgs(){
+    ofLogNotice("PinchExtendedState")<<"initialPinchArgs";
     m_pinchArgs.assign(ofxGestures::PinchEventArgs(ofxGestures::get().m_touches[0], ofxGestures::get().m_touches[1]));
-    notifyPinchEvent();
 }
 
-PinchState::~PinchState(){
-    ofLogNotice("PinchState")<<"destroy";
-}
-
-bool PinchState::innerMove(ofTouchEventArgs &touch){
+bool PinchExtendedState::innerMove(ofTouchEventArgs & touch){
     if(!m_pinchArgs.isNull() && (touch.id == 1 || touch.id == 0)){
         m_pinchArgs.value().setCurrentTouch(touch);
         return true;
@@ -130,27 +154,24 @@ bool PinchState::innerMove(ofTouchEventArgs &touch){
     return false;
 }
 
-bool PinchState::touchDown(ofTouchEventArgs & touch){
+bool PinchExtendedState::touchDown(ofTouchEventArgs & touch){
     bool attended = false;
     if(touch.id == 1 || touch.id == 0){
-        m_pinchArgs.assign(ofxGestures::PinchEventArgs(ofxGestures::get().m_touches[0], ofxGestures::get().m_touches[1]));
+        initialPinchArgs();
         attended = notifyPinchEvent();
     }
     return attended;
 }
 
-bool PinchState::touchMoved(ofTouchEventArgs & touch){
+bool PinchExtendedState::touchMoved(ofTouchEventArgs & touch){
     bool attended = false;
     if(innerMove(touch)){
-        if(isExtended())
-            setNextState<PinchExtendedState>();
-        else
-            attended = notifyPinchEvent();
+        attended = notifyPinchEvent();
     }
     return attended;
 }
 
-bool PinchState::touchUp(ofTouchEventArgs & touch){
+bool PinchExtendedState::touchUp(ofTouchEventArgs & touch){
     bool attended = false;
     if(touch.id == 1 || touch.id == 0){
         if(!m_pinchArgs.isNull()){
@@ -164,55 +185,50 @@ bool PinchState::touchUp(ofTouchEventArgs & touch){
     return attended;
 }
 
-bool PinchState::isExtended(){
-    if(getPixelsByPercent(PINCH_DELTA_TOLLERANCE) < m_pinchArgs.value().getInnerDelta().length())
-        return true;
-    if (m_pinchArgs.value().getInnerAngle() > PINCH_ANGLE_TOLLERANCE)
-        return true;
-    return false;
-}
-
-bool PinchState::notifyPinchEvent(){
+bool PinchExtendedState::notifyPinchEvent(){
     return ofxGestures::get().notifyPinchEvent(m_pinchArgs);
 }
 
-bool PinchState::notifyPinchEventEnded(){
+bool PinchExtendedState::notifyPinchEventEnded(){
     return ofxGestures::get().notifyPinchEventEnded(m_pinchArgs);
 }
 
-Poco::Nullable<ofxGestures::PinchEventArgs> PinchState::getPinchEventArgs(){
+Poco::Nullable<ofxGestures::PinchEventArgs> PinchExtendedState::getPinchEventArgs(){
     return m_pinchArgs;
 }
 
-//================================ PinchExtended State ==================================//
-PinchExtendedState::PinchExtendedState():PinchState(){
-    ofLogNotice("PinchExtendedState")<<"created";
+//================================ Pinch State ==================================//
+PinchState::PinchState():PinchExtendedState(false){
+    ofLogNotice("PinchState")<<"created";
+    m_pinchArgs.value().disableExtended();
+    notifyPinchEvent();
 }
 
-PinchExtendedState::~PinchExtendedState(){
-    ofLogNotice("PinchExtendedState")<<"destroy";
+PinchState::~PinchState(){
+    ofLogNotice("PinchState")<<"destroy";
 }
 
-bool PinchExtendedState::touchDown(ofTouchEventArgs & touch){
-    return PinchState::touchDown(touch);
+void PinchState::initialPinchArgs(){
+    PinchExtendedState::initialPinchArgs();
+    m_pinchArgs.value().disableExtended();
+    ofLogNotice("PinchState")<<"initialPinchArgs";
 }
 
-bool PinchExtendedState::touchMoved(ofTouchEventArgs & touch){
-    if(innerMove(touch))
-        return notifyPinchEvent();
+bool PinchState::isExtended(){
+    if(PINCH_DELTA_TOLLERANCE() < m_pinchArgs.value().getInnerDelta().length())
+        return true;
+    if (std::abs(m_pinchArgs.value().getInnerAngle()) > PINCH_ANGLE_TOLLERANCE)
+        return true;
     return false;
 }
 
-bool PinchExtendedState::touchUp(ofTouchEventArgs & touch){
-    return PinchState::touchUp(touch);
-}
-
-bool PinchExtendedState::notifyPinchEvent(){
-    m_pinchArgs.value().enabledExtended();
-    return PinchState::notifyPinchEvent();
-}
-
-bool PinchExtendedState::notifyPinchEventEnded(){
-    m_pinchArgs.value().enabledExtended();
-    return PinchState::notifyPinchEventEnded();
+bool PinchState::touchMoved(ofTouchEventArgs & touch){
+    bool attended = false;
+    if(innerMove(touch)){
+        if(isExtended())
+            setNextState<PinchExtendedState>();
+        else
+            attended = notifyPinchEvent();
+    }
+    return attended;
 }

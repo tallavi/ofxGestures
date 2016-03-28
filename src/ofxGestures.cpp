@@ -307,15 +307,15 @@ void ofxGestures::PinchEventArgs::setFirstCurrentTouch(const ofTouchEventArgs &t
 }
 
 void ofxGestures::PinchEventArgs::setSecondCurrentTouch(const ofTouchEventArgs &touch){
-    m_firstTouch.setCurrent(touch);
+    m_secondTouch.setCurrent(touch);
 }
 
 bool ofxGestures::PinchEventArgs::isExtended()const{
     return m_extended;
 }
 
-void ofxGestures::PinchEventArgs::enabledExtended(){
-    m_extended = true;
+void ofxGestures::PinchEventArgs::disableExtended(){
+    m_extended = false;
 }
 
 ofVec2f ofxGestures::PinchEventArgs::getOrigin() const {
@@ -337,8 +337,8 @@ double ofxGestures::PinchEventArgs::getScale() const {
     ofVec2f currentDelta = m_secondTouch.m_current - m_firstTouch.m_current;
     ofVec2f originDelta = m_secondTouch.m_origin - m_firstTouch.m_origin;
     
-    double currentLength = sqrt(pow(currentDelta.x, 2) + pow(currentDelta.y, 2));
-    double originLength = sqrt(pow(originDelta.x, 2) + pow(originDelta.y, 2));
+    double currentLength = currentDelta.length();//sqrt(pow(currentDelta.x, 2) + pow(currentDelta.y, 2));
+    double originLength = originDelta.length();
     
     return currentLength / originLength;
 }
