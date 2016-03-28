@@ -97,10 +97,13 @@ void FirstTouchState::onTimer(Poco::Timer& timer){
 //================================ Pan State ==================================//
 PanState::PanState(){
     m_panArgs.assign(ofxGestures::PanEventArgs(ofxGestures::get().m_touches[0]));
-    ofxGestures::get().notifyPanEvent(m_panArgs);
 }
 
 PanState::~PanState(){
+}
+
+void PanState::notifyStart(){
+    ofxGestures::get().notifyPanEvent(m_panArgs);
 }
 
 bool PanState::touchDown(ofTouchEventArgs & touch){
@@ -127,18 +130,23 @@ Poco::Nullable<ofxGestures::PanEventArgs> PanState::getPanEventArgs(){
 }
 
 //================================ PinchExtended State ==================================//
-PinchExtendedState::PinchExtendedState():PinchExtendedState(true){
+PinchExtendedState::PinchExtendedState(){
     ofLogNotice("PinchExtendedState")<<"created";
+    initialPinchArgs();
 }
 
-PinchExtendedState::PinchExtendedState(bool isNotify){
-    initialPinchArgs();
-    if(isNotify)
-        notifyPinchEvent();
-}
+//PinchExtendedState::PinchExtendedState(bool isNotify){
+//    
+//    if(isNotify)
+//        notifyPinchEvent();
+//}
 
 PinchExtendedState::~PinchExtendedState(){
     ofLogNotice("PinchExtendedState")<<"destroy";
+}
+
+void PinchExtendedState::notifyStart(){
+    notifyPinchEvent();
 }
 
 void PinchExtendedState::initialPinchArgs(){
@@ -198,10 +206,10 @@ Poco::Nullable<ofxGestures::PinchEventArgs> PinchExtendedState::getPinchEventArg
 }
 
 //================================ Pinch State ==================================//
-PinchState::PinchState():PinchExtendedState(false){
+PinchState::PinchState():PinchExtendedState(){
     ofLogNotice("PinchState")<<"created";
     m_pinchArgs.value().disableExtended();
-    notifyPinchEvent();
+//    notifyPinchEvent();
 }
 
 PinchState::~PinchState(){

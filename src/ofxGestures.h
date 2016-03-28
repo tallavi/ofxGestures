@@ -104,9 +104,12 @@ public:
         virtual Poco::Nullable<PinchEventArgs> getPinchEventArgs();
         
     protected:
+        virtual void notifyStart(){};
+        
         template<class S>
         void setNextState(){
             ofxGestures::get().m_state.reset(new S());
+            ofxGestures::get().m_state->notifyStart();
         }
     };
     
