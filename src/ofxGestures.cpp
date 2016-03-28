@@ -33,151 +33,18 @@ ofxGestures::~ofxGestures()
 bool ofxGestures::touchDown(ofTouchEventArgs & touchEventArgs) {
     Touch touch(touchEventArgs);
     m_touches[touchEventArgs.id] = touch;
-    bool attended = m_state->touchDown(touchEventArgs);
-    
-    //check if should stop panning
-//    if (!m_currentPanEvent.isNull() && m_touches.size() > 1)
-//    {
-//        try{
-//            panEndedEvent.notify(this, m_currentPanEvent.value());
-//        }catch(...){
-//            attended = true;
-//        }
-//        
-//        m_currentPanEvent.clear();
-//    }
-//    
-//    //check if should start panning
-//    if (m_currentPanEvent.isNull() && m_touches.size() == 1 && touchExists(0))
-//    {
-//        PanEventArgs newPanEventArgs;
-//        
-//        newPanEventArgs.origin = m_touches[0].origin;
-//        newPanEventArgs.current = m_touches[0].current;
-//        
-//        m_currentPanEvent.assign(newPanEventArgs);
-//
-//        try{
-//            panEvent.notify(this, m_currentPanEvent.value());
-//        }catch(...){
-//            attended = true;
-//        }
-//    }
-//    
-//    //check if should start pinching
-//    if (m_currentPinchEvent.isNull() && touchExists(0) && touchExists(1))
-//    {
-//        PinchEventArgs newPinchEventArgs;
-//        
-//        newPinchEventArgs.origin1 = m_touches[0].origin;
-//        newPinchEventArgs.origin2 = m_touches[1].origin;
-//        newPinchEventArgs.current1 = m_touches[0].current;
-//        newPinchEventArgs.current2 = m_touches[1].current;
-//        newPinchEventArgs.previous1 = m_touches[0].origin;
-//        newPinchEventArgs.previous2 = m_touches[1].origin;
-//        
-//        m_currentPinchEvent.assign(newPinchEventArgs);
-//
-//        try{
-//        	pinchEvent.notify(this, m_currentPinchEvent.value());
-//        }catch(...){
-//            attended = true;
-//        }
-//    }
-
-    return attended;
+    return m_state->touchDown(touchEventArgs);
 };
 
 
 bool ofxGestures::touchMoved(ofTouchEventArgs & touch) {
     m_touches[touch.id].setCurrent(touch);
-    bool attended = m_state->touchMoved(touch);
-    
-//    if (!m_currentPanEvent.isNull() && touch.id == 0)
-//    {
-//        m_currentPanEvent.value().current = touch;
-//
-//        try{
-//            panEvent.notify(this, m_currentPanEvent.value());
-//        }catch(...){
-//            attended = true;
-//        }
-//    }
-//    
-//    bool notifyPinch = false;
-//    
-//    if (!m_currentPinchEvent.isNull() && touch.id == 0)
-//    {
-//        m_currentPinchEvent.value().current1 = touch;
-//        
-//        notifyPinch = true;
-//    }
-//    
-//    if (!m_currentPinchEvent.isNull() && touch.id == 1)
-//    {
-//        m_currentPinchEvent.value().current2 = touch;
-//        
-//        notifyPinch = true;
-//    }
-//    
-//    if (notifyPinch) {
-//        
-//        if (!m_currentPinchEvent.value().isExtended) {
-//            
-//            //TALTODO:
-//            
-//            //if angle > tolerance, set extended true
-//            
-//            //else if delta > tolerance, set extended true
-//            
-//            m_currentPinchEvent.value().isExtended = true;
-//        }
-//        
-//        try{
-//            pinchEvent.notify(this, m_currentPinchEvent.value());
-//        }catch(...){
-//            attended = true;
-//        }
-//        
-//        m_currentPinchEvent.value().previous1 = m_currentPinchEvent.value().current1;
-//        m_currentPinchEvent.value().previous2 = m_currentPinchEvent.value().current2;
-//    }
-    
-    return attended;
+    return m_state->touchMoved(touch);;
 };
 
 bool ofxGestures::touchUp(ofTouchEventArgs &touch) {
     m_touches.erase(touch.id);
-    bool attended = m_state->touchUp(touch);//false;
-    
-//    if (!m_currentPanEvent.isNull())
-//    {
-//        if (!touchExists(0))   
-//        {
-//            try{
-//            	panEndedEvent.notify(this, m_currentPanEvent);
-//            }catch(...){
-//                attended = true;
-//            }
-//            
-//            m_currentPanEvent.clear();
-//        }
-//    }
-//    
-//    if (!m_currentPinchEvent.isNull())
-//    {
-//        if (!touchExists(0) || !touchExists(1))
-//        {
-//            try{
-//            	pinchEndedEvent.notify(this, m_currentPinchEvent);
-//            }catch(...){
-//                attended = true;
-//            }
-//            
-//            m_currentPinchEvent.clear();
-//        }
-//    }
-    return attended;
+    return m_state->touchUp(touch);;
 };
 
 bool ofxGestures::notifyTapEvent(const ofVec2f &tapArg){
@@ -337,7 +204,7 @@ double ofxGestures::PinchEventArgs::getScale() const {
     ofVec2f currentDelta = m_secondTouch.m_current - m_firstTouch.m_current;
     ofVec2f originDelta = m_secondTouch.m_origin - m_firstTouch.m_origin;
     
-    double currentLength = currentDelta.length();//sqrt(pow(currentDelta.x, 2) + pow(currentDelta.y, 2));
+    double currentLength = currentDelta.length();
     double originLength = originDelta.length();
     
     return currentLength / originLength;
@@ -348,8 +215,8 @@ double ofxGestures::PinchEventArgs::getRelativeScale() const {
     ofVec2f currentDelta = m_secondTouch.m_current - m_firstTouch.m_current;
     ofVec2f previousDelta = m_secondTouch.m_previous - m_firstTouch.m_previous;
     
-    double currentLength = sqrt(pow(currentDelta.x, 2) + pow(currentDelta.y, 2));
-    double previousLength = sqrt(pow(previousDelta.x, 2) + pow(previousDelta.y, 2));
+    double currentLength = currentDelta.length();
+    double previousLength = previousDelta.length();
     
     return currentLength / previousLength;
 }
@@ -395,8 +262,8 @@ double ofxGestures::PinchEventArgs::getAngle(const ofTouchEventArgs &first, cons
     ofVec2f currentDelta = m_secondTouch.m_current - m_firstTouch.m_current;
     ofVec2f originDelta = second - first;
     
-    double currentLength = sqrt(pow(currentDelta.x, 2) + pow(currentDelta.y, 2));
-    double originLength = sqrt(pow(originDelta.x, 2) + pow(originDelta.y, 2));
+    double currentLength = currentDelta.length();
+    double originLength = originDelta.length();
     
     double currentAngle = ofRadToDeg(asin(currentDelta.x / currentLength));
     double originAngle = ofRadToDeg(asin(originDelta.x / originLength));
