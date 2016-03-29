@@ -15,19 +15,19 @@
 const double TAP_MAX_TIME = 0.5;
 const int PINCH_ANGLE_TOLLERANCE = 30;
 
-const double PRESS_LONG_TIME(1.0);
+const double PRESS_LONG_TIME(0.75);
 
 float getPixelsByPercent(int percent){
     return ofGetWindowWidth()*percent / 100.0;
 }
 
 const int PAN_DELTA_TOLLERANCE(){
-    static const int pan_delta_tollerance = getPixelsByPercent(1);
+    static const int pan_delta_tollerance = getPixelsByPercent(5);
     return pan_delta_tollerance;
 }
 
 const int PINCH_DELTA_TOLLERANCE(){
-    static const int pinch_delta_tollerance = getPixelsByPercent(4);
+    static const int pinch_delta_tollerance = getPixelsByPercent(30);
     return pinch_delta_tollerance;
 }
 
