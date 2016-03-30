@@ -29,6 +29,7 @@ public:
     virtual bool touchUp(ofTouchEventArgs & touch)override;
 private:
     void onTimer(Poco::Timer& timer);
+    bool m_isStateInvalide = false;
     
     Poco::Timer m_tapTimer;
     Poco::Timestamp m_initialTime;

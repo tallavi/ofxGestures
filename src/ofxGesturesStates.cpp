@@ -18,8 +18,8 @@ const int& PAN_DELTA_TOLLERANCE(){
     return pan_delta_tollerance;
 }
 
-const double TAP_MAX_DURATION_MICROSECOND = 0.5 * 1000 * 1000;
-const double LONG_PRESS_DURATION_MILLISECOND = 0.75 * 1000;
+const double TAP_MAX_DURATION_MICROSECOND(0.5 * 1000 * 1000);
+const double LONG_PRESS_DURATION_MILLISECOND(0.75 * 1000);
 
 //================================ None State ==================================//
 NoneState::NoneState(){
@@ -44,12 +44,20 @@ FirstTouchState::~FirstTouchState(){
 }
 
 bool FirstTouchState::touchDown(ofTouchEventArgs & touch){
+    if(m_isStateInvalide){
+        setNextState<NoneState>();
+        return false;
+    }
     m_tapTimer.stop();
     setNextState<PinchState>();
     return false;
 }
 
 bool FirstTouchState::touchMoved(ofTouchEventArgs & touch){
+    if(m_isStateInvalide){
+        setNextState<NoneState>();
+        return false;
+    }
     ofxGestures::Touch &current_touch = ofxGestures::get().m_touches[0];
     if((current_touch.m_origin - current_touch.m_current).length() > PAN_DELTA_TOLLERANCE()){
         m_tapTimer.stop();
@@ -60,10 +68,13 @@ bool FirstTouchState::touchMoved(ofTouchEventArgs & touch){
 
 bool FirstTouchState::touchUp(ofTouchEventArgs & touch){
     bool attended = false;
-    m_tapTimer.stop();
-    Poco::Timestamp::TimeDiff deltaTime = Poco::Timestamp() - m_initialTime;
-    if(deltaTime < TAP_MAX_DURATION_MICROSECOND){
-        attended = ofxGestures::get().notifyTapEvent(ofxGestures::get().m_touches[0].m_origin);
+    if(!m_isStateInvalide)
+    {
+        m_tapTimer.stop();
+        Poco::Timestamp::TimeDiff deltaTime = Poco::Timestamp() - m_initialTime;
+        if(deltaTime < TAP_MAX_DURATION_MICROSECOND){
+            attended = ofxGestures::get().notifyTapEvent(ofxGestures::get().m_touches[0].m_origin);
+        }
     }
     setNextState<NoneState>();
     return attended;
@@ -71,7 +82,7 @@ bool FirstTouchState::touchUp(ofTouchEventArgs & touch){
 
 void FirstTouchState::onTimer(Poco::Timer& timer){
     ofxGestures::get().notifyLongPressEvent(ofxGestures::get().m_touches[0].m_origin);
-    setNextState<NoneState>();
+    m_isStateInvalide = true;
 }
 
 //================================ Pan State ==================================//
@@ -135,17 +146,10 @@ bool PinchState::touchDown(ofTouchEventArgs & touch){
 bool PinchState::touchMoved(ofTouchEventArgs & touch){
     bool attended = false;
     
-    bool shouldNotify = false;
-    
     if(!m_pinchArgs.isNull() && (touch.id == 1 || touch.id == 0)){
         m_pinchArgs.value().setCurrentTouch(touch);
-        shouldNotify = true;
-    }
-    
-    if(shouldNotify){
         attended = notifyPinchEvent();
     }
-    
     return attended;
 }
 
