@@ -9,37 +9,17 @@
 #include "ofxGesturesStates.h"
 #include "EnvironmentHelper.h"
 
-//const int PAN_DELTA_TOLLERANCE = 1;
-//const int PINCH_DELTA_TOLLERANCE = 4;
-
-const double TAP_MAX_TIME = 0.5;
-const int PINCH_ANGLE_TOLLERANCE = 30;
-
-const double PRESS_LONG_TIME(0.75);
-
 float getPixelsByPercent(int percent){
     return ofGetWindowWidth()*percent / 100.0;
 }
 
-const int PAN_DELTA_TOLLERANCE(){
+const int& PAN_DELTA_TOLLERANCE(){
     static const int pan_delta_tollerance = getPixelsByPercent(5);
     return pan_delta_tollerance;
 }
 
-const int PINCH_DELTA_TOLLERANCE(){
-    static const int pinch_delta_tollerance = getPixelsByPercent(30);
-    return pinch_delta_tollerance;
-}
-
-const double TAP_MAX_TIME_MICROSECOND(){
-    static const double tap_max_time(TAP_MAX_TIME * 1000 * 1000);
-    return tap_max_time;
-}
-
-const double PRESS_LONG_TIME_MILLISECOND(){
-    static const double press_long_time(PRESS_LONG_TIME * 1000);
-    return press_long_time;
-}
+const double TAP_MAX_DURATION_MICROSECOND = 0.5 * 1000 * 1000;
+const double LONG_PRESS_DURATION_MILLISECOND = 0.75 * 1000;
 
 //================================ None State ==================================//
 NoneState::NoneState(){
@@ -56,7 +36,7 @@ bool NoneState::touchDown(ofTouchEventArgs &touch){
 
 //================================ FirstTouch State ==================================//
 FirstTouchState::FirstTouchState(){
-    m_tapTimer.setStartInterval(PRESS_LONG_TIME_MILLISECOND());
+    m_tapTimer.setStartInterval(LONG_PRESS_DURATION_MILLISECOND);
     m_tapTimer.start(Poco::TimerCallback<FirstTouchState>(*this, &FirstTouchState::onTimer));
 }
 
@@ -82,7 +62,7 @@ bool FirstTouchState::touchUp(ofTouchEventArgs & touch){
     bool attended = false;
     m_tapTimer.stop();
     Poco::Timestamp::TimeDiff deltaTime = Poco::Timestamp() - m_initialTime;
-    if(deltaTime < TAP_MAX_TIME_MICROSECOND()){
+    if(deltaTime < TAP_MAX_DURATION_MICROSECOND){
         attended = ofxGestures::get().notifyTapEvent(ofxGestures::get().m_touches[0].m_origin);
     }
     setNextState<NoneState>();
@@ -129,57 +109,47 @@ Poco::Nullable<ofxGestures::PanEventArgs> PanState::getPanEventArgs(){
     return m_panArgs;
 }
 
-//================================ PinchExtended State ==================================//
-PinchExtendedState::PinchExtendedState(){
-    ofLogNotice("PinchExtendedState")<<"created";
-    initialPinchArgs();
-}
+//================================ Pinch State ==================================//
 
-//PinchExtendedState::PinchExtendedState(bool isNotify){
-//    
-//    if(isNotify)
-//        notifyPinchEvent();
-//}
-
-PinchExtendedState::~PinchExtendedState(){
-    ofLogNotice("PinchExtendedState")<<"destroy";
-}
-
-void PinchExtendedState::notifyStart(){
-    notifyPinchEvent();
-}
-
-void PinchExtendedState::initialPinchArgs(){
-    ofLogNotice("PinchExtendedState")<<"initialPinchArgs";
+PinchState::PinchState() {
     m_pinchArgs.assign(ofxGestures::PinchEventArgs(ofxGestures::get().m_touches[0], ofxGestures::get().m_touches[1]));
 }
 
-bool PinchExtendedState::innerMove(ofTouchEventArgs & touch){
-    if(!m_pinchArgs.isNull() && (touch.id == 1 || touch.id == 0)){
-        m_pinchArgs.value().setCurrentTouch(touch);
-        return true;
-    }
-    return false;
+PinchState::~PinchState(){
+    ofLogNotice("PinchState")<<"destroy";
 }
 
-bool PinchExtendedState::touchDown(ofTouchEventArgs & touch){
+void PinchState::notifyStart(){
+    notifyPinchEvent();
+}
+
+bool PinchState::touchDown(ofTouchEventArgs & touch){
     bool attended = false;
     if(touch.id == 1 || touch.id == 0){
-        initialPinchArgs();
+        m_pinchArgs.assign(ofxGestures::PinchEventArgs(ofxGestures::get().m_touches[0], ofxGestures::get().m_touches[1]));
         attended = notifyPinchEvent();
     }
     return attended;
 }
 
-bool PinchExtendedState::touchMoved(ofTouchEventArgs & touch){
+bool PinchState::touchMoved(ofTouchEventArgs & touch){
     bool attended = false;
-    if(innerMove(touch)){
+    
+    bool shouldNotify = false;
+    
+    if(!m_pinchArgs.isNull() && (touch.id == 1 || touch.id == 0)){
+        m_pinchArgs.value().setCurrentTouch(touch);
+        shouldNotify = true;
+    }
+    
+    if(shouldNotify){
         attended = notifyPinchEvent();
     }
+    
     return attended;
 }
 
-bool PinchExtendedState::touchUp(ofTouchEventArgs & touch){
+bool PinchState::touchUp(ofTouchEventArgs & touch){
     bool attended = false;
     if(touch.id == 1 || touch.id == 0){
         if(!m_pinchArgs.isNull()){
@@ -193,50 +163,16 @@ bool PinchExtendedState::touchUp(ofTouchEventArgs & touch){
     return attended;
 }
 
-bool PinchExtendedState::notifyPinchEvent(){
+bool PinchState::notifyPinchEvent(){
     return ofxGestures::get().notifyPinchEvent(m_pinchArgs);
 }
 
-bool PinchExtendedState::notifyPinchEventEnded(){
+bool PinchState::notifyPinchEventEnded(){
     return ofxGestures::get().notifyPinchEventEnded(m_pinchArgs);
 }
 
-Poco::Nullable<ofxGestures::PinchEventArgs> PinchExtendedState::getPinchEventArgs(){
+Poco::Nullable<ofxGestures::PinchEventArgs> PinchState::getPinchEventArgs(){
     return m_pinchArgs;
 }
 
-//================================ Pinch State ==================================//
-PinchState::PinchState():PinchExtendedState(){
-    ofLogNotice("PinchState")<<"created";
-    m_pinchArgs.value().disableExtended();
-//    notifyPinchEvent();
-}
 
-PinchState::~PinchState(){
-    ofLogNotice("PinchState")<<"destroy";
-}
-
-void PinchState::initialPinchArgs(){
-    PinchExtendedState::initialPinchArgs();
-    m_pinchArgs.value().disableExtended();
-    ofLogNotice("PinchState")<<"initialPinchArgs";
-}
-
-bool PinchState::isExtended(){
-    if(PINCH_DELTA_TOLLERANCE() < m_pinchArgs.value().getInnerDelta().length())
-        return true;
-    if (std::abs(m_pinchArgs.value().getInnerAngle()) > PINCH_ANGLE_TOLLERANCE)
-        return true;
-    return false;
-}
-
-bool PinchState::touchMoved(ofTouchEventArgs & touch){
-    bool attended = false;
-    if(innerMove(touch)){
-        if(isExtended())
-            setNextState<PinchExtendedState>();
-        else
-            attended = notifyPinchEvent();
-    }
-    return attended;
-}

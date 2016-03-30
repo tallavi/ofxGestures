@@ -73,22 +73,16 @@ public:
         double getScale() const;
         double getRelativeScale() const;
         
-        bool isExtended()const;
-        void disableExtended();
-        
         ofVec2f getDelta() const;
         ofVec2f getRelativeDelta() const;
         double getAngle() const;
         double getRelativeAngle() const;
         
     private:
-        ofVec2f getInnerDelta() const;
-        double getInnerAngle() const;
         double getAngle(const ofTouchEventArgs &first, const ofTouchEventArgs &second) const;
         
         Touch m_firstTouch;
         Touch m_secondTouch;
-        bool m_extended = true;
     };
     
     class BaseState{

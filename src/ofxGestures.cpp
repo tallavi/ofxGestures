@@ -177,14 +177,6 @@ void ofxGestures::PinchEventArgs::setSecondCurrentTouch(const ofTouchEventArgs &
     m_secondTouch.setCurrent(touch);
 }
 
-bool ofxGestures::PinchEventArgs::isExtended()const{
-    return m_extended;
-}
-
-void ofxGestures::PinchEventArgs::disableExtended(){
-    m_extended = false;
-}
-
 ofVec2f ofxGestures::PinchEventArgs::getOrigin() const {
     
     return (m_secondTouch.m_origin + m_firstTouch.m_origin) / 2.0;
@@ -223,39 +215,22 @@ double ofxGestures::PinchEventArgs::getRelativeScale() const {
 
 ofVec2f ofxGestures::PinchEventArgs::getDelta() const {
     
-    if (!m_extended)
-        return ofVec2f(0,0);
-    
-    return getInnerDelta();
+    return (m_secondTouch.m_current + m_firstTouch.m_current - m_secondTouch.m_origin - m_firstTouch.m_origin) / 2.0;
 }
 
 ofVec2f ofxGestures::PinchEventArgs::getRelativeDelta() const {
-    
-    if (!m_extended)
-        return ofVec2f(0,0);
     
     return (m_secondTouch.m_current + m_firstTouch.m_current - m_secondTouch.m_previous - m_firstTouch.m_previous) / 2.0;
 }
 
 double ofxGestures::PinchEventArgs::getAngle() const {
  
-    if (!m_extended)
-        return 0.0;
-    return getInnerAngle();
+    return getAngle(m_firstTouch.m_origin, m_secondTouch.m_origin);
 }
 
 double ofxGestures::PinchEventArgs::getRelativeAngle() const {
-    if (!m_extended)
-        return 0.0;
+
     return getAngle(m_firstTouch.m_previous, m_secondTouch.m_previous);
-}
-
-ofVec2f ofxGestures::PinchEventArgs::getInnerDelta()const{
-    return (m_secondTouch.m_current + m_firstTouch.m_current - m_secondTouch.m_origin - m_firstTouch.m_origin) / 2.0;
-}
-
-double ofxGestures::PinchEventArgs::getInnerAngle()const{
-    return getAngle(m_firstTouch.m_origin, m_secondTouch.m_origin);
 }
 
 double ofxGestures::PinchEventArgs::getAngle(const ofTouchEventArgs &first, const ofTouchEventArgs &second)const{

@@ -17,8 +17,6 @@ public:
     ~NoneState();
     
     virtual bool touchDown(ofTouchEventArgs & touch)override;
-//    virtual bool touchMoved(ofTouchEventArgs & touch)override;
-//    virtual bool touchUp(ofTouchEventArgs & touch)override;
 };
 
 class FirstTouchState : public ofxGestures::BaseState{
@@ -52,40 +50,23 @@ private:
     Poco::Nullable<ofxGestures::PanEventArgs> m_panArgs;
 };
 
-class PinchExtendedState : public ofxGestures::BaseState{
+class PinchState : public ofxGestures::BaseState{
 public:
-    PinchExtendedState();
-//    PinchExtendedState(bool isNotify);
-    ~PinchExtendedState();
+    PinchState();
+    ~PinchState();
     
-    virtual bool touchDown(ofTouchEventArgs & touch)override;
-    virtual bool touchMoved(ofTouchEventArgs & touch)override;
-    virtual bool touchUp(ofTouchEventArgs & touch)override;
+    bool touchDown(ofTouchEventArgs & touch)override;
+    bool touchMoved(ofTouchEventArgs & touch)override;
+    bool touchUp(ofTouchEventArgs & touch)override;
     
     virtual Poco::Nullable<ofxGestures::PinchEventArgs> getPinchEventArgs()override;
     
 protected:
     virtual void notifyStart()override;
     
-    virtual void initialPinchArgs();
-    
-    bool innerMove(ofTouchEventArgs & touch);
-    
     bool notifyPinchEvent();
     bool notifyPinchEventEnded();
     
     Poco::Nullable<ofxGestures::PinchEventArgs> m_pinchArgs;
-};
-
-class PinchState : public PinchExtendedState{
-public:
-    PinchState();
-    ~PinchState();
-    
-    virtual bool touchMoved(ofTouchEventArgs &touch)override;
-    
-protected:
-    virtual void initialPinchArgs()override;
-    bool isExtended();
 };
 
