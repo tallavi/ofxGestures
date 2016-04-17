@@ -7,7 +7,6 @@
 //
 
 #include "ofxGesturesStates.h"
-#include "EnvironmentHelper.h"
 
 float getPixelsByPercent(int percent){
     return ofGetWindowWidth()*percent / 100.0;
