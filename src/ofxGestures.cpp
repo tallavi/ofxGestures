@@ -15,6 +15,11 @@ ofxGestures & ofxGestures::get(){
 	return *instance;
 }
 
+void ofxGestures::reset(){
+    m_touches.clear();
+    m_state = std::make_shared<NoneState>();
+}
+
 ofxGestures::ofxGestures()
 {
     m_state = std::make_shared<NoneState>();

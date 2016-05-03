@@ -111,6 +111,7 @@ public:
     Poco::Nullable<PinchEventArgs> getPinchEventArgs(){return m_state->getPinchEventArgs();}
     
     static ofxGestures & get();
+    void reset();
 
 private:
     bool touchDown(ofTouchEventArgs & touch);
