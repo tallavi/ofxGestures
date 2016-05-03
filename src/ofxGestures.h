@@ -113,7 +113,6 @@ public:
     static ofxGestures & get();
     void start();
     void stop();
-    void reset();
 
 private:
     bool touchDown(ofTouchEventArgs & touch);

@@ -16,6 +16,10 @@ ofxGestures & ofxGestures::get(){
 }
 
 void ofxGestures::start(){
+    
+    m_touches.clear();
+    m_state = std::make_shared<NoneState>();
+    
     ofAddListener(ofEvents().touchDown, this, &ofxGestures::touchDown, OF_EVENT_ORDER_BEFORE_APP);
     ofAddListener(ofEvents().touchMoved, this, &ofxGestures::touchMoved, OF_EVENT_ORDER_BEFORE_APP);
     ofAddListener(ofEvents().touchUp, this, &ofxGestures::touchUp, OF_EVENT_ORDER_BEFORE_APP);
@@ -27,11 +31,6 @@ void ofxGestures::stop(){
     ofRemoveListener(ofEvents().touchMoved, this, &ofxGestures::touchMoved, OF_EVENT_ORDER_BEFORE_APP);
     ofRemoveListener(ofEvents().touchUp, this, &ofxGestures::touchUp, OF_EVENT_ORDER_BEFORE_APP);
 //    ofRemoveListener(ofEvents().touchCancelled, this,  &ofxGestures::touchCanceled, OF_EVENT_ORDER_BEFORE_APP);
-}
-
-void ofxGestures::reset(){
-    m_touches.clear();
-    m_state = std::make_shared<NoneState>();
 }
 
 ofxGestures::ofxGestures()
