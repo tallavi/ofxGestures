@@ -26,6 +26,7 @@ ofxGestures::ofxGestures()
     ofAddListener(ofEvents().touchDown, this, &ofxGestures::touchDown, OF_EVENT_ORDER_BEFORE_APP);
 	ofAddListener(ofEvents().touchMoved, this, &ofxGestures::touchMoved, OF_EVENT_ORDER_BEFORE_APP);
     ofAddListener(ofEvents().touchUp, this, &ofxGestures::touchUp, OF_EVENT_ORDER_BEFORE_APP);
+    ofAddListener(ofEvents().touchCancelled, this,  &ofxGestures::touchCanceled, OF_EVENT_ORDER_BEFORE_APP);
 }
 
 ofxGestures::~ofxGestures()
@@ -33,27 +34,35 @@ ofxGestures::~ofxGestures()
     ofRemoveListener(ofEvents().touchDown, this, &ofxGestures::touchDown, OF_EVENT_ORDER_BEFORE_APP);
 	ofRemoveListener(ofEvents().touchMoved, this, &ofxGestures::touchMoved, OF_EVENT_ORDER_BEFORE_APP);
     ofRemoveListener(ofEvents().touchUp, this, &ofxGestures::touchUp, OF_EVENT_ORDER_BEFORE_APP);
+    ofRemoveListener(ofEvents().touchCancelled, this,  &ofxGestures::touchCanceled, OF_EVENT_ORDER_BEFORE_APP);
 }
 
 bool ofxGestures::touchDown(ofTouchEventArgs & touchEventArgs) {
     Touch touch(touchEventArgs);
     m_touches[touchEventArgs.id] = touch;
-    ofLogNotice("ofxGestures")<<"touchDown";
+    ofLogNotice("ofxGestures")<<"touchDown id: "<<touchEventArgs.id;
     return m_state->touchDown(touchEventArgs);
 };
 
 
 bool ofxGestures::touchMoved(ofTouchEventArgs & touch) {
-    ofLogNotice("ofxGestures")<<"touchMoved";
+    ofLogNotice("ofxGestures")<<"touchMoved id: "<<touch.id;
+    if(m_touches.empty())
+        ofLogNotice("ofxGestures")<<"touchMoved empty";
     m_touches[touch.id].setCurrent(touch);
     return m_state->touchMoved(touch);;
 };
 
 bool ofxGestures::touchUp(ofTouchEventArgs &touch) {
-    ofLogNotice("ofxGestures")<<"touchUp";
+    ofLogNotice("ofxGestures")<<"touchUp id: "<<touch.id;
     m_touches.erase(touch.id);
     return m_state->touchUp(touch);;
 };
+
+bool ofxGestures::touchCanceled(ofTouchEventArgs & touch){
+    ofLogNotice("ofxGestures")<<"touchCanceled id: "<<touch.id;
+    return false;
+}
 
 bool ofxGestures::notifyTapEvent(const ofVec2f &tapArg){
     bool attended = false;

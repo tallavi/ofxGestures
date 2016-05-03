@@ -117,6 +117,7 @@ private:
     bool touchDown(ofTouchEventArgs & touch);
     bool touchMoved(ofTouchEventArgs & touch);
     bool touchUp(ofTouchEventArgs & touch);
+    bool touchCanceled(ofTouchEventArgs & touch);
     
     bool touchExists(int touchNum){return (m_touches.find(touchNum) != m_touches.end());}
     
