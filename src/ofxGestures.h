@@ -111,6 +111,8 @@ public:
     Poco::Nullable<PinchEventArgs> getPinchEventArgs(){return m_state->getPinchEventArgs();}
     
     static ofxGestures & get();
+    void start();
+    void stop();
     void reset();
 
 private:

@@ -15,6 +15,20 @@ ofxGestures & ofxGestures::get(){
 	return *instance;
 }
 
+void start(){
+    ofAddListener(ofEvents().touchDown, this, &ofxGestures::touchDown, OF_EVENT_ORDER_BEFORE_APP);
+    ofAddListener(ofEvents().touchMoved, this, &ofxGestures::touchMoved, OF_EVENT_ORDER_BEFORE_APP);
+    ofAddListener(ofEvents().touchUp, this, &ofxGestures::touchUp, OF_EVENT_ORDER_BEFORE_APP);
+//    ofAddListener(ofEvents().touchCancelled, this,  &ofxGestures::touchCanceled, OF_EVENT_ORDER_BEFORE_APP);
+}
+
+void stop(){
+    ofRemoveListener(ofEvents().touchDown, this, &ofxGestures::touchDown, OF_EVENT_ORDER_BEFORE_APP);
+    ofRemoveListener(ofEvents().touchMoved, this, &ofxGestures::touchMoved, OF_EVENT_ORDER_BEFORE_APP);
+    ofRemoveListener(ofEvents().touchUp, this, &ofxGestures::touchUp, OF_EVENT_ORDER_BEFORE_APP);
+//    ofRemoveListener(ofEvents().touchCancelled, this,  &ofxGestures::touchCanceled, OF_EVENT_ORDER_BEFORE_APP);
+}
+
 void ofxGestures::reset(){
     m_touches.clear();
     m_state = std::make_shared<NoneState>();
@@ -23,19 +37,10 @@ void ofxGestures::reset(){
 ofxGestures::ofxGestures()
 {
     m_state = std::make_shared<NoneState>();
-    ofAddListener(ofEvents().touchDown, this, &ofxGestures::touchDown, OF_EVENT_ORDER_BEFORE_APP);
-	ofAddListener(ofEvents().touchMoved, this, &ofxGestures::touchMoved, OF_EVENT_ORDER_BEFORE_APP);
-    ofAddListener(ofEvents().touchUp, this, &ofxGestures::touchUp, OF_EVENT_ORDER_BEFORE_APP);
-    ofAddListener(ofEvents().touchCancelled, this,  &ofxGestures::touchCanceled, OF_EVENT_ORDER_BEFORE_APP);
 }
 
 ofxGestures::~ofxGestures()
-{
-    ofRemoveListener(ofEvents().touchDown, this, &ofxGestures::touchDown, OF_EVENT_ORDER_BEFORE_APP);
-	ofRemoveListener(ofEvents().touchMoved, this, &ofxGestures::touchMoved, OF_EVENT_ORDER_BEFORE_APP);
-    ofRemoveListener(ofEvents().touchUp, this, &ofxGestures::touchUp, OF_EVENT_ORDER_BEFORE_APP);
-    ofRemoveListener(ofEvents().touchCancelled, this,  &ofxGestures::touchCanceled, OF_EVENT_ORDER_BEFORE_APP);
-}
+{}
 
 bool ofxGestures::touchDown(ofTouchEventArgs & touchEventArgs) {
     Touch touch(touchEventArgs);
