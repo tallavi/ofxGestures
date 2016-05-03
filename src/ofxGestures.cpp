@@ -47,16 +47,19 @@ bool ofxGestures::touchDown(ofTouchEventArgs & touchEventArgs) {
 
 bool ofxGestures::touchMoved(ofTouchEventArgs & touch) {
     ofLogNotice("ofxGestures")<<"touchMoved id: "<<touch.id;
-    if(m_touches.empty())
+    if(m_touches.empty()){
         ofLogNotice("ofxGestures")<<"touchMoved empty";
+        return false;
+    }
     m_touches[touch.id].setCurrent(touch);
-    return m_state->touchMoved(touch);;
-};
+    return m_state->touchMoved(touch);};
 
 bool ofxGestures::touchUp(ofTouchEventArgs &touch) {
     ofLogNotice("ofxGestures")<<"touchUp id: "<<touch.id;
+    if(m_touches.empty())
+        return false;
     m_touches.erase(touch.id);
-    return m_state->touchUp(touch);;
+    return m_state->touchUp(touch);
 };
 
 bool ofxGestures::touchCanceled(ofTouchEventArgs & touch){
