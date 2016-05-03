@@ -15,14 +15,14 @@ ofxGestures & ofxGestures::get(){
 	return *instance;
 }
 
-void start(){
+void ofxGestures::start(){
     ofAddListener(ofEvents().touchDown, this, &ofxGestures::touchDown, OF_EVENT_ORDER_BEFORE_APP);
     ofAddListener(ofEvents().touchMoved, this, &ofxGestures::touchMoved, OF_EVENT_ORDER_BEFORE_APP);
     ofAddListener(ofEvents().touchUp, this, &ofxGestures::touchUp, OF_EVENT_ORDER_BEFORE_APP);
 //    ofAddListener(ofEvents().touchCancelled, this,  &ofxGestures::touchCanceled, OF_EVENT_ORDER_BEFORE_APP);
 }
 
-void stop(){
+void ofxGestures::stop(){
     ofRemoveListener(ofEvents().touchDown, this, &ofxGestures::touchDown, OF_EVENT_ORDER_BEFORE_APP);
     ofRemoveListener(ofEvents().touchMoved, this, &ofxGestures::touchMoved, OF_EVENT_ORDER_BEFORE_APP);
     ofRemoveListener(ofEvents().touchUp, this, &ofxGestures::touchUp, OF_EVENT_ORDER_BEFORE_APP);
