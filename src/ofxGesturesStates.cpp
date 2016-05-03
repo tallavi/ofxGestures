@@ -22,6 +22,7 @@ const double LONG_PRESS_DURATION_MILLISECOND(0.75 * 1000);
 
 //================================ None State ==================================//
 NoneState::NoneState(){
+    ofLogNotice("ofxGestures")<<"NoneState";
 }
 
 NoneState::~NoneState(){
@@ -35,6 +36,7 @@ bool NoneState::touchDown(ofTouchEventArgs &touch){
 
 //================================ FirstTouch State ==================================//
 FirstTouchState::FirstTouchState(){
+    ofLogNotice("ofxGestures")<<"FirstTouchState";
     m_tapTimer.setStartInterval(LONG_PRESS_DURATION_MILLISECOND);
     m_tapTimer.start(Poco::TimerCallback<FirstTouchState>(*this, &FirstTouchState::onTimer));
 }
@@ -86,6 +88,7 @@ void FirstTouchState::onTimer(Poco::Timer& timer){
 
 //================================ Pan State ==================================//
 PanState::PanState(){
+    ofLogNotice("ofxGestures")<<"PanState";
     m_panArgs.assign(ofxGestures::PanEventArgs(ofxGestures::get().m_touches[0]));
 }
 
@@ -122,6 +125,7 @@ Poco::Nullable<ofxGestures::PanEventArgs> PanState::getPanEventArgs(){
 //================================ Pinch State ==================================//
 
 PinchState::PinchState() {
+    ofLogNotice("ofxGestures")<<"PinchState";
     m_pinchArgs.assign(ofxGestures::PinchEventArgs(ofxGestures::get().m_touches[0], ofxGestures::get().m_touches[1]));
 }
 

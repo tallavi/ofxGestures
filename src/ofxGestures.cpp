@@ -38,16 +38,19 @@ ofxGestures::~ofxGestures()
 bool ofxGestures::touchDown(ofTouchEventArgs & touchEventArgs) {
     Touch touch(touchEventArgs);
     m_touches[touchEventArgs.id] = touch;
+    ofLogNotice("ofxGestures")<<"touchDown";
     return m_state->touchDown(touchEventArgs);
 };
 
 
 bool ofxGestures::touchMoved(ofTouchEventArgs & touch) {
+    ofLogNotice("ofxGestures")<<"touchMoved";
     m_touches[touch.id].setCurrent(touch);
     return m_state->touchMoved(touch);;
 };
 
 bool ofxGestures::touchUp(ofTouchEventArgs &touch) {
+    ofLogNotice("ofxGestures")<<"touchUp";
     m_touches.erase(touch.id);
     return m_state->touchUp(touch);;
 };
