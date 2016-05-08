@@ -35,6 +35,7 @@ public:
         Touch();
         Touch(const ofTouchEventArgs &origin);
         void setCurrent(const ofTouchEventArgs &current);
+        void resetOrigin();
     };
     
     class PanEventArgs{

@@ -150,6 +150,10 @@ void ofxGestures::Touch::setCurrent(const ofTouchEventArgs &current){
     this->m_current = current;
 }
 
+void ofxGestures::Touch::resetOrigin() {
+    m_origin = m_previous = m_current;
+}
+
 //================================= PanEventArgs ================================//
 ofxGestures::PanEventArgs::PanEventArgs(const Touch &touch):m_touch(touch){
 

@@ -100,7 +100,6 @@ void PanState::notifyStart(){
 }
 
 bool PanState::touchDown(ofTouchEventArgs & touch){
-    m_panArgs.value().setCurrentTouch(touch);
     bool attended = ofxGestures::get().notifyPanEventEnded(m_panArgs);
     setNextState<PinchState>();
     return attended;
@@ -126,6 +125,10 @@ Poco::Nullable<ofxGestures::PanEventArgs> PanState::getPanEventArgs(){
 
 PinchState::PinchState() {
     ofLogNotice("ofxGestures")<<"PinchState";
+    
+    ofxGestures::get().m_touches[0].resetOrigin();
+    ofxGestures::get().m_touches[1].resetOrigin();
+    
     m_pinchArgs.assign(ofxGestures::PinchEventArgs(ofxGestures::get().m_touches[0], ofxGestures::get().m_touches[1]));
 }
 
