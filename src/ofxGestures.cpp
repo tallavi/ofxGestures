@@ -23,14 +23,14 @@ void ofxGestures::start(){
     ofAddListener(ofEvents().touchDown, this, &ofxGestures::touchDown, OF_EVENT_ORDER_BEFORE_APP);
     ofAddListener(ofEvents().touchMoved, this, &ofxGestures::touchMoved, OF_EVENT_ORDER_BEFORE_APP);
     ofAddListener(ofEvents().touchUp, this, &ofxGestures::touchUp, OF_EVENT_ORDER_BEFORE_APP);
-//    ofAddListener(ofEvents().touchCancelled, this,  &ofxGestures::touchCanceled, OF_EVENT_ORDER_BEFORE_APP);
+    ofAddListener(ofEvents().touchCancelled, this,  &ofxGestures::touchUp, OF_EVENT_ORDER_BEFORE_APP);
 }
 
 void ofxGestures::stop(){
     ofRemoveListener(ofEvents().touchDown, this, &ofxGestures::touchDown, OF_EVENT_ORDER_BEFORE_APP);
     ofRemoveListener(ofEvents().touchMoved, this, &ofxGestures::touchMoved, OF_EVENT_ORDER_BEFORE_APP);
     ofRemoveListener(ofEvents().touchUp, this, &ofxGestures::touchUp, OF_EVENT_ORDER_BEFORE_APP);
-//    ofRemoveListener(ofEvents().touchCancelled, this,  &ofxGestures::touchCanceled, OF_EVENT_ORDER_BEFORE_APP);
+    ofRemoveListener(ofEvents().touchCancelled, this,  &ofxGestures::touchUp, OF_EVENT_ORDER_BEFORE_APP);
 }
 
 ofxGestures::ofxGestures()
@@ -51,8 +51,8 @@ bool ofxGestures::touchDown(ofTouchEventArgs & touchEventArgs) {
 
 bool ofxGestures::touchMoved(ofTouchEventArgs & touch) {
     ofLogNotice("ofxGestures")<<"touchMoved id: "<<touch.id;
-    if(m_touches.empty()){
-        ofLogNotice("ofxGestures")<<"touchMoved empty";
+    if(m_touches.find(touch.id) == m_touches.end()){
+        ofLogNotice("ofxGestures")<<"touchMoved touch not found";
         return false;
     }
     m_touches[touch.id].setCurrent(touch);
@@ -60,17 +60,12 @@ bool ofxGestures::touchMoved(ofTouchEventArgs & touch) {
 
 bool ofxGestures::touchUp(ofTouchEventArgs &touch) {
     ofLogNotice("ofxGestures")<<"touchUp id: "<<touch.id;
-    if(m_touches.empty())
+    if(m_touches.find(touch.id) == m_touches.end())
         return false;
     bool result =    m_state->touchUp(touch);
     m_touches.erase(touch.id);
     return result;
 };
-
-bool ofxGestures::touchCanceled(ofTouchEventArgs & touch){
-    ofLogNotice("ofxGestures")<<"touchCanceled id: "<<touch.id;
-    return false;
-}
 
 bool ofxGestures::notifyTapEvent(const ofVec2f &tapArg){
     bool attended = false;
