@@ -62,8 +62,9 @@ bool ofxGestures::touchUp(ofTouchEventArgs &touch) {
     ofLogNotice("ofxGestures")<<"touchUp id: "<<touch.id;
     if(m_touches.empty())
         return false;
+    bool result =    m_state->touchUp(touch);
     m_touches.erase(touch.id);
-    return m_state->touchUp(touch);
+    return result;
 };
 
 bool ofxGestures::touchCanceled(ofTouchEventArgs & touch){
