@@ -114,6 +114,8 @@ public:
     static ofxGestures & get();
     void start();
     void stop();
+    
+    size_t getTouchesCount();
 
 private:
     bool touchDown(ofTouchEventArgs & touch);

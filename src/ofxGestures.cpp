@@ -33,6 +33,10 @@ void ofxGestures::stop(){
     ofRemoveListener(ofEvents().touchCancelled, this,  &ofxGestures::touchUp, OF_EVENT_ORDER_BEFORE_APP);
 }
 
+size_t ofxGestures::getTouchesCount(){
+    return m_touches.size();
+}
+
 ofxGestures::ofxGestures()
 {
     m_state = std::make_shared<NoneState>();
