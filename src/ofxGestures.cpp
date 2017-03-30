@@ -7,6 +7,7 @@
 
 #include "ofxGestures.h"
 #include "ofxGesturesStates.h"
+#include "ofLog.h"
 
 //====================== ofxGestures ==================//
 
@@ -48,22 +49,22 @@ ofxGestures::~ofxGestures()
 bool ofxGestures::touchDown(ofTouchEventArgs & touchEventArgs) {
     Touch touch(touchEventArgs);
     m_touches[touchEventArgs.id] = touch;
-    ofLogNotice("ofxGestures")<<"touchDown id: "<<touchEventArgs.id;
+    ofLogVerbose("ofxGestures")<<"touchDown id: "<<touchEventArgs.id;
     return m_state->touchDown(touchEventArgs);
 };
 
 
 bool ofxGestures::touchMoved(ofTouchEventArgs & touch) {
-    ofLogNotice("ofxGestures")<<"touchMoved id: "<<touch.id;
+    ofLogVerbose("ofxGestures")<<"touchMoved id: "<<touch.id;
     if(m_touches.find(touch.id) == m_touches.end()){
-        ofLogNotice("ofxGestures")<<"touchMoved touch not found";
+        ofLogWarning("ofxGestures")<<"touchMoved touch not found";
         return false;
     }
     m_touches[touch.id].setCurrent(touch);
     return m_state->touchMoved(touch);};
 
 bool ofxGestures::touchUp(ofTouchEventArgs &touch) {
-    ofLogNotice("ofxGestures")<<"touchUp id: "<<touch.id;
+    ofLogVerbose("ofxGestures")<<"touchUp id: "<<touch.id;
     if(m_touches.find(touch.id) == m_touches.end())
         return false;
     bool result =    m_state->touchUp(touch);
