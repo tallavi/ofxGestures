@@ -7,7 +7,8 @@
 
 #pragma once
 
-#include "ofMain.h"
+#include "ofVec2f.h"
+#include "ofEvents.h"
 #include <Poco/Nullable.h>
 #include <Poco/Timestamp.h>
 

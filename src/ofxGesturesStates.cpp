@@ -7,6 +7,8 @@
 //
 
 #include "ofxGesturesStates.h"
+#include "ofLog.h"
+#include "ofAppRunner.h"
 
 float getPixelsByPercent(int percent){
     return ofGetWindowWidth()*percent / 100.0;
@@ -22,7 +24,7 @@ const double LONG_PRESS_DURATION_MILLISECOND(0.75 * 1000);
 
 //================================ None State ==================================//
 NoneState::NoneState(){
-    ofLogNotice("ofxGestures")<<"NoneState";
+    ofLogVerbose("ofxGestures")<<"NoneState";
 }
 
 NoneState::~NoneState(){
@@ -36,7 +38,7 @@ bool NoneState::touchDown(ofTouchEventArgs &touch){
 
 //================================ FirstTouch State ==================================//
 FirstTouchState::FirstTouchState(){
-    ofLogNotice("ofxGestures")<<"FirstTouchState";
+    ofLogVerbose("ofxGestures")<<"FirstTouchState";
     m_tapTimer.setStartInterval(LONG_PRESS_DURATION_MILLISECOND);
     m_tapTimer.start(Poco::TimerCallback<FirstTouchState>(*this, &FirstTouchState::onTimer));
 }
@@ -88,7 +90,7 @@ void FirstTouchState::onTimer(Poco::Timer& timer){
 
 //================================ Pan State ==================================//
 PanState::PanState(){
-    ofLogNotice("ofxGestures")<<"PanState";
+    ofLogVerbose("ofxGestures")<<"PanState";
     m_panArgs.assign(ofxGestures::PanEventArgs(ofxGestures::get().m_touches[0]));
 }
 
@@ -124,7 +126,7 @@ Poco::Nullable<ofxGestures::PanEventArgs> PanState::getPanEventArgs(){
 //================================ Pinch State ==================================//
 
 PinchState::PinchState() {
-    ofLogNotice("ofxGestures")<<"PinchState";
+    ofLogVerbose("ofxGestures")<<"PinchState";
     
     ofxGestures::get().m_touches[0].resetOrigin();
     ofxGestures::get().m_touches[1].resetOrigin();
@@ -133,7 +135,7 @@ PinchState::PinchState() {
 }
 
 PinchState::~PinchState(){
-    ofLogNotice("PinchState")<<"destroy";
+    ofLogVerbose("ofxGestures")<<"PinchState destroy";
 }
 
 void PinchState::notifyStart(){
